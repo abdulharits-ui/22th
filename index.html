@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Level 22 Unlocked!</title>
+    <style>
+        :root {
+            --neon-color: #00f2ff;
+            --heart-color: #ff0077;
+            --bg-color: #0a0a0a;
+            --gold-color: #ffd700;
+            --grid-color: rgba(0, 242, 255, 0.07);
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            background-image: 
+                linear-gradient(var(--grid-color) 1px, transparent 1px),
+                linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+            background-size: 40px 40px;
+            color: white;
+            font-family: 'Courier New', Courier, monospace;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            overflow-x: hidden; 
+        }
+
+        /* HUD Pojok Layar */
+        body::before {
+            content: "SYSTEM_STATUS: ONLINE | BATT: 100%";
+            position: fixed; top: 10px; left: 10px; font-size: 10px; color: var(--neon-color); z-index: 10;
+        }
+        body::after {
+            content: "SCANNING... AGE_DETECTION: 22";
+            position: fixed; bottom: 10px; right: 10px; font-size: 10px; color: var(--neon-color); z-index: 10;
+        }
+
+        /* --- SCREEN 1: GAME OVER --- */
+        #gameOverScreen {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-color: black;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            cursor: pointer;
+            transition: 1s ease;
+        }
+
+        .game-over-text {
+            color: #ff0000;
+            font-size: 3rem;
+            font-weight: bold;
+            text-align: center;
+            text-shadow: 0 0 20px #ff0000;
+            margin: 0;
+            animation: blink 0.8s infinite;
+        }
+
+        .volume-warning {
+            color: var(--gold-color);
+            margin-top: 40px;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            opacity: 0.8;
+            animation: pulse 1.5s infinite;
+        }
+
+        .click-to-continue {
+            color: white;
+            margin-top: 15px;
+            letter-spacing: 3px;
+            font-size: 0.7rem;
+            opacity: 0.6;
+        }
+
+        /* --- SCREEN 2: MAIN CONTENT --- */
+        .container {
+            text-align: center;
+            padding: 60px 20px;
+            max-width: 600px;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: 1.5s ease;
+            position: relative;
+            z-index: 5;
+        }
+
+        .container.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            color: var(--neon-color);
+            text-shadow: 0 0 20px var(--neon-color);
+            margin: 10px 0;
+        }
+
+        .profile-container {
+            position: relative;
+            width: 180px;
+            margin: 40px auto 20px;
+        }
+
+        .birthday-hat {
+            position: absolute;
+            top: -45px;
+            right: 10px;
+            font-size: 60px;
+            z-index: 10;
+            transform: rotate(15deg);
+            filter: drop-shadow(0 0 10px rgba(255,255,255,0.3));
+        }
+
+        .profile-frame {
+            width: 180px;
+            height: 180px;
+            border: 3px solid var(--neon-color);
+            border-radius: 50%;
+            overflow: hidden;
+            box-shadow: 0 0 30px var(--neon-color);
+        }
+
+        .profile-frame img { width: 100%; height: 100%; object-fit: cover; }
+
+        .status-container { margin: 20px 0; }
+        .bar-bg { background: #222; height: 12px; border-radius: 6px; border: 1px solid var(--neon-color); overflow: hidden; }
+        .bar-fill { 
+            background: var(--heart-color); 
+            height: 100%; width: 100%; 
+            box-shadow: 0 0 15px var(--heart-color);
+        }
+
+        .menu-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .game-btn {
+            background: rgba(0, 242, 255, 0.05);
+            color: var(--neon-color);
+            border: 1px solid var(--neon-color);
+            padding: 12px;
+            cursor: pointer;
+            font-family: 'Courier New', Courier, monospace;
+            font-weight: bold;
+            transition: 0.3s;
+            border-radius: 4px;
+        }
+
+        .game-btn:hover {
+            background: var(--neon-color);
+            color: black;
+            box-shadow: 0 0 20px var(--neon-color);
+        }
+
+        .content-box {
+            display: none;
+            margin-top: 25px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--neon-color);
+            border-radius: 10px;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .gallery-grid img { 
+            width: 100%; 
+            aspect-ratio: 1/1; 
+            object-fit: cover; 
+            border-radius: 4px; 
+            border: 1px solid var(--neon-color); 
+        }
+
+        /* --- QUEST STYLING --- */
+        .quest-container {
+            margin-top: 20px;
+            text-align: left;
+            border-top: 1px dashed var(--neon-color);
+            padding-top: 15px;
+        }
+        .quest-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+        .quest-checkbox {
+            width: 15px;
+            height: 15px;
+            border: 1px solid var(--gold-color);
+            display: inline-block;
+        }
+
+        #confetti-canvas {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        /* --- RESPONSIVE MOBILE (PORTRAIT) --- */
+        @media screen and (max-width: 480px) {
+            h1 { font-size: 1.6rem; }
+            .game-over-text { font-size: 2rem; }
+            .menu-grid { grid-template-columns: 1fr; }
+            .gallery-grid { grid-template-columns: repeat(2, 1fr); }
+            .container { padding: 40px 15px; }
+            .birthday-hat { font-size: 50px; top: -35px; }
+            .profile-frame { width: 150px; height: 150px; }
+            .profile-container { width: 150px; }
+        }
+
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .fade-out { opacity: 0 !important; pointer-events: none; }
+    </style>
+</head>
+<body>
+
+    <canvas id="confetti-canvas"></canvas>
+
+    <div id="gameOverScreen" onclick="startGame()">
+        <p class="game-over-text">LEVEL 21<br>GAME OVER</p>
+        
+        <div class="volume-warning">
+            <span>🔊</span>
+            <span>PLEASE TURN ON VOLUME</span>
+        </div>
+
+        <p class="click-to-continue">PRESS ANY KEY TO START LEVEL 22</p>
+    </div>
+
+    <div class="container" id="mainContent">
+        <p style="color: var(--gold-color); font-size: 0.8rem;">>> LOADING NEW CHAPTER...</p>
+        <h1>LEVEL 22 UNLOCKED</h1>
+        
+        <div class="profile-container">
+            <div class="birthday-hat">🥳</div> 
+            <div class="profile-frame">
+                <img src="fotopacar.jpg" alt="Player 1">
+            </div>
+        </div>
+
+        <div class="status-container">
+            <div style="display: flex; justify-content: space-between; font-size: 10px; margin-bottom: 5px;">
+                <span>ROLE: THE BEST PARTNER</span>
+                <span>HP: ❤️ 100%</span>
+            </div>
+            <div class="bar-bg"><div class="bar-fill" id="hpFill"></div></div>
+        </div>
+
+        <div class="menu-grid">
+            <button class="game-btn" onclick="showTab('stats')">📊 STATS</button>
+            <button class="game-btn" onclick="showTab('gallery')">🖼️ ALBUM</button>
+            <button class="game-btn" onclick="showTab('message')" style="grid-column: span 2;">✉️ MESSAGE FROM Player 2</button>
+        </div>
+
+        <div id="stats" class="content-box">
+            <h3 style="color: var(--gold-color); margin-top: 0;">PLAYER ATTRIBUTES</h3>
+            <p>Kindness: 999+</p>
+            <p>Beauty: 999+</p>
+            <p>Cuteness: 999+</p>
+            <p>Patience: GODLIKE</p>
+        </div>
+
+        <div id="gallery" class="content-box">
+            <h3 style="color: var(--neon-color); margin-top: 0;">MEMORIES UNLOCKED</h3>
+            <div class="gallery-grid">
+                <img src="kenangan1.jpg" alt="1">
+                <img src="kenangan2.jpg" alt="2">
+                <img src="kenangan3.jpg" alt="3">
+                <img src="kenangan4.jpg" alt="4">
+                <img src="kenangan5.jpg" alt="5">
+                <img src="kenangan6.jpg" alt="6">
+            </div>
+        </div>
+
+        <div id="message" class="content-box">
+            <h3 style="color: var(--heart-color); margin-top: 0;">MESSAGE</h3>
+            <p>Selamat ulang tahun ke-22 sayangku! Semoga di umur ke 22 tahun ini, mui selalu diberikan kesehatan, keberkahan dalam hidupnya. Diberikan rezeki yang melimpah dan berkah. Diberikan ilmu yang bermanfaat bagi diri sendiri dan orang lain. Serta selalu diberi kemudahan dan ketabahan di setiap kegiatan atau tugas mui aamiinn ya rabbal alaminn. You deserve to happy all the time babe. Selamat ulang tahun sayang :D</p>
+            
+            <div class="quest-container">
+                <h4 style="color: var(--gold-color); margin: 0 0 10px 0;">[NEW QUESTS UNLOCKED]</h4>
+                <div class="quest-item">
+                    <div class="quest-checkbox"></div>
+                    <span>1. Lulus cumlaude</span>
+                </div>
+                <div class="quest-item">
+                    <div class="quest-checkbox"></div>
+                    <span>2. Dapat kerja yang memuaskan</span>
+                </div>
+                <p style="font-size: 10px; color: var(--neon-color); margin-top: 10px;">*Rewards: Infinite Happiness & Support from Player 2</p>
+            </div>
+        </div>
+
+        <audio id="bgMusic" loop>
+            <source src="lagufavorit.mp3" type="audio/mpeg">
+        </audio>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('confetti-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height - canvas.height;
+                this.size = Math.random() * 7 + 4;
+                this.speed = Math.random() * 1.5 + 1;
+                this.color = `hsl(${Math.random() * 360}, 70%, 60%)`;
+                this.angle = Math.random() * 6.28;
+            }
+            update() {
+                this.y += this.speed;
+                this.angle += 0.05;
+                if (this.y > canvas.height) {
+                    this.y = -10;
+                    this.x = Math.random() * canvas.width;
+                }
+            }
+            draw() {
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                ctx.rotate(this.angle);
+                ctx.fillStyle = this.color;
+                ctx.fillRect(-this.size/2, -this.size/2, this.size, this.size);
+                ctx.restore();
+            }
+        }
+
+        function createConfetti() {
+            for (let i = 0; i < 40; i++) {
+                particles.push(new Particle());
+            }
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+            requestAnimationFrame(animate);
+        }
+
+        function startGame() {
+            document.getElementById('gameOverScreen').classList.add('fade-out');
+            document.body.style.overflow = 'auto'; 
+            
+            setTimeout(() => {
+                document.getElementById('mainContent').classList.add('active');
+                document.getElementById('bgMusic').play().catch(e => console.log("Music blocked"));
+                createConfetti();
+                animate();
+            }, 500);
+        }
+
+        function showTab(id) {
+            const boxes = document.querySelectorAll('.content-box');
+            boxes.forEach(box => box.style.display = 'none');
+            document.getElementById(id).style.display = 'block';
+            
+            // Auto scroll ke bawah agar konten baru terlihat
+            setTimeout(() => {
+                window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+            }, 100);
+        }
+    </script>
+</body>
+</html>
